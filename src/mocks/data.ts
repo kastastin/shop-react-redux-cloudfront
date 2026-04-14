@@ -5,40 +5,39 @@ import { AvailableProduct, Product } from "~/models/Product";
 
 export const products: Product[] = [
   {
-    description: "Short Product Description1",
-    id: "7567ec4b-b10c-48c5-9345-fc73c48a80aa",
-    price: 24,
-    title: "ProductOne",
+    id: "1",
+    title: 'Apple MacBook Pro 16" M3 Pro',
+    description:
+      "Powerful laptop with M3 Pro chip, 18GB RAM, 512GB SSD, Liquid Retina XDR display",
+    price: 2499,
   },
   {
-    description: "Short Product Description7",
-    id: "7567ec4b-b10c-48c5-9345-fc73c48a80a1",
-    price: 15,
-    title: "ProductTitle",
+    id: "2",
+    title: "Dell XPS 15 9530",
+    description:
+      "Premium laptop with Intel Core i7-13700H, 16GB RAM, 512GB SSD, OLED touch display",
+    price: 1799,
   },
   {
-    description: "Short Product Description2",
-    id: "7567ec4b-b10c-48c5-9345-fc73c48a80a3",
-    price: 23,
-    title: "Product",
+    id: "3",
+    title: "Lenovo ThinkPad X1 Carbon Gen 11",
+    description:
+      'Ultra-light business laptop with Intel Core i7, 16GB RAM, 1TB SSD, 14" IPS display',
+    price: 1599,
   },
   {
-    description: "Short Product Description4",
-    id: "7567ec4b-b10c-48c5-9345-fc73348a80a1",
-    price: 15,
-    title: "ProductTest",
+    id: "4",
+    title: "ASUS ROG Zephyrus G14",
+    description:
+      "Gaming laptop with AMD Ryzen 9, RTX 4060, 16GB RAM, 1TB SSD, 144Hz QHD display",
+    price: 1399,
   },
   {
-    description: "Short Product Descriptio1",
-    id: "7567ec4b-b10c-48c5-9445-fc73c48a80a2",
-    price: 23,
-    title: "Product2",
-  },
-  {
-    description: "Short Product Description7",
-    id: "7567ec4b-b10c-45c5-9345-fc73c48a80a1",
-    price: 15,
-    title: "ProductName",
+    id: "5",
+    title: "Microsoft Surface Laptop 5",
+    description:
+      "Sleek laptop with Intel Core i5, 8GB RAM, 256GB SSD, PixelSense touchscreen",
+    price: 999,
   },
 ];
 

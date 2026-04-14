@@ -24,7 +24,7 @@
     "cloudfront:update:build:deploy:nc": "npm run cloudfront:setup && npm run cloudfront:build:deploy:nc",
     "serverless:remove": "sls remove",
     "cdk:synth": "cd infra && cdk synth",
-    "cdk:deploy": "npm run build && cd infra && cdk deploy --require-approval never",
+    "cdk:deploy": "npm run build && cd infra && npm run build && cdk deploy --all --require-approval never",
     "cdk:invalidate": "dotenv -e .env -- sh -c 'aws cloudfront create-invalidation --distribution-id $CDK_CLOUDFRONT_ID --paths \"/*\"'",
     "cdk:deploy:invalidate": "npm run cdk:deploy && npm run cdk:invalidate"
   },
