@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: Product Service API
+  description: API for managing products in the shop
+  version: 1.0.0
+
+servers:
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/prod
+    description: AWS API Gateway
+    variables:
+      apiId:
+        default: your-api-id
+      region:
+        default: eu-west-1
+
+paths:
+  /products:
+    get:
+      summary: Get all products
+      description: Returns a list of all available products
+      operationId: getProductsList
+      tags:
+        - Products
+      responses:
+        "200":
+          description: A list of products
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+              example:
+                - id: "1"
+                  title: Nike Air Max 270
+                  description: Comfortable running shoes with Air Max cushioning technology
+                  price: 150
+                  count: 10
+
+  /products/{productId}:
+    get:
+      summary: Get product by ID
+      description: Returns a single product matching the provided ID
+      operationId: getProductsById
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The unique identifier of the product
+          schema:
+            type: string
+          example: "1"
+      responses:
+        "200":
+          description: A single product
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request — product ID is missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Product ID is required
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Product not found
+
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - price
+        - count
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the product
+          example: "1"
+        title:
+          type: string
+          description: Name of the product
+          example: Nike Air Max 270
+        description:
+          type: string
+          description: Detailed description of the product
+          example: Comfortable running shoes with Air Max cushioning technology
+        price:
+          type: number
+          description: Price of the product in USD
+          example: 150
+        count:
+          type: integer
+          description: Number of items available in stock
+          example: 10
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+          example: Product not found
