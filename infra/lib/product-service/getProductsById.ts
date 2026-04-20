@@ -1,41 +1,39 @@
-import { products } from "./products.js";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient, PRODUCTS_TABLE, STOCK_TABLE, buildResponse } from "./dynamo.js";
 
 interface LambdaEvent {
   pathParameters?: Record<string, string | undefined> | null;
 }
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Methods": "GET",
-};
-
 export const handler = async (event: LambdaEvent) => {
+  console.log("getProductsById event:", JSON.stringify(event));
+
   const productId = event.pathParameters?.productId;
-
-  console.log(`getProductsById invoked with productId: ${productId}`);
-
   if (!productId) {
-    return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ message: "Product ID is required" }),
-    };
+    return buildResponse(400, { message: "Product ID is required" });
   }
 
-  const product = products.find((p) => p.id === productId);
+  try {
+    const [productResult, stockResult] = await Promise.all([
+      docClient.send(new GetCommand({ TableName: PRODUCTS_TABLE, Key: { id: productId } })),
+      docClient.send(new GetCommand({ TableName: STOCK_TABLE, Key: { product_id: productId } })),
+    ]);
 
-  if (!product) {
-    return {
-      statusCode: 404,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ message: "Product not found" }),
+    if (!productResult.Item) {
+      return buildResponse(404, { message: "Product not found" });
+    }
+
+    const product = {
+      id: productResult.Item.id as string,
+      title: productResult.Item.title as string,
+      description: productResult.Item.description as string,
+      price: productResult.Item.price as number,
+      count: (stockResult.Item?.count as number) ?? 0,
     };
-  }
 
-  return {
-    statusCode: 200,
-    headers: CORS_HEADERS,
-    body: JSON.stringify(product),
-  };
+    return buildResponse(200, product);
+  } catch (err) {
+    console.error("getProductsById error:", err);
+    return buildResponse(500, { message: "Internal server error" });
+  }
 };
