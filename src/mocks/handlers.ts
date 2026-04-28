@@ -13,6 +13,7 @@ export const handlers = [
       ctx.json<AvailableProduct[]>(availableProducts)
     );
   }),
+
   rest.get(`${API_PATHS.product}/products/:productId`, (req, res, ctx) => {
     const product = availableProducts.find(
       (p) => p.id === req.params.productId
@@ -26,15 +27,19 @@ export const handlers = [
       ctx.json<AvailableProduct>(product)
     );
   }),
+
   rest.get(`${API_PATHS.bff}/product`, (req, res, ctx) => {
     return res(ctx.status(200), ctx.delay(), ctx.json<Product[]>(products));
   }),
+
   rest.put(`${API_PATHS.bff}/product`, (req, res, ctx) => {
     return res(ctx.status(200));
   }),
+
   rest.delete(`${API_PATHS.bff}/product/:id`, (req, res, ctx) => {
     return res(ctx.status(200));
   }),
+
   rest.get(`${API_PATHS.bff}/product/available`, (req, res, ctx) => {
     return res(
       ctx.status(200),
@@ -42,6 +47,7 @@ export const handlers = [
       ctx.json<AvailableProduct[]>(availableProducts)
     );
   }),
+
   rest.get(`${API_PATHS.bff}/product/:id`, (req, res, ctx) => {
     const product = availableProducts.find((p) => p.id === req.params.id);
     if (!product) {
@@ -53,18 +59,23 @@ export const handlers = [
       ctx.json<AvailableProduct>(product)
     );
   }),
+
   rest.get(`${API_PATHS.cart}/profile/cart`, (req, res, ctx) => {
     return res(ctx.status(200), ctx.delay(), ctx.json<CartItem[]>(cart));
   }),
+
   rest.put(`${API_PATHS.cart}/profile/cart`, (req, res, ctx) => {
     return res(ctx.status(200));
   }),
+
   rest.get(`${API_PATHS.order}/order`, (req, res, ctx) => {
     return res(ctx.status(200), ctx.delay(), ctx.json<Order[]>(orders));
   }),
+
   rest.put(`${API_PATHS.order}/order`, (req, res, ctx) => {
     return res(ctx.status(200));
   }),
+
   rest.get(`${API_PATHS.order}/order/:id`, (req, res, ctx) => {
     const order = orders.find((p) => p.id === req.params.id);
     if (!order) {
@@ -72,10 +83,20 @@ export const handlers = [
     }
     return res(ctx.status(200), ctx.delay(), ctx.json(order));
   }),
+
   rest.delete(`${API_PATHS.order}/order/:id`, (req, res, ctx) => {
     return res(ctx.status(200));
   }),
+
   rest.put(`${API_PATHS.order}/order/:id/status`, (req, res, ctx) => {
     return res(ctx.status(200));
+  }),
+
+  rest.get(`${API_PATHS.import}/import`, (req, res, ctx) => {
+    const name = req.url.searchParams.get("name") ?? "file.csv";
+    return res(
+      ctx.status(200),
+      ctx.json(`https://mock-bucket.s3.amazonaws.com/uploaded/${name}?signed`)
+    );
   }),
 ];
