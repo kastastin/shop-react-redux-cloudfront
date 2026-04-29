@@ -1,24 +1,43 @@
 import {
-  GetObjectCommand,
-  CopyObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
-import type { S3Event } from "aws-lambda";
-import type { Readable } from "stream";
-import csvParser from "csv-parser";
-import {
   s3Client,
   IMPORT_BUCKET,
   UPLOADED_PREFIX,
   PARSED_PREFIX,
 } from "./s3.js";
+import {
+  GetObjectCommand,
+  CopyObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import type { S3Event } from "aws-lambda";
+import type { Readable } from "stream";
+import csvParser from "csv-parser";
+
+const sqsClient = new SQSClient({ region: process.env.AWS_REGION });
+const CATALOG_ITEMS_QUEUE_URL = process.env.CATALOG_ITEMS_QUEUE_URL as string;
+
+const sendRecord = (record: unknown) =>
+  sqsClient.send(
+    new SendMessageCommand({
+      QueueUrl: CATALOG_ITEMS_QUEUE_URL,
+      MessageBody: JSON.stringify(record),
+    })
+  );
 
 const parseStream = (stream: Readable) =>
-  new Promise<void>((resolve, reject) => {
+  new Promise<number>((resolve, reject) => {
+    const pending: Promise<unknown>[] = [];
     stream
       .pipe(csvParser())
-      .on("data", (record) => console.log("Parsed record:", record))
-      .on("end", () => resolve())
+      .on("data", (record) => {
+        pending.push(sendRecord(record));
+      })
+      .on("end", () => {
+        Promise.all(pending)
+          .then(() => resolve(pending.length))
+          .catch(reject);
+      })
       .on("error", reject);
   });
 
@@ -51,7 +70,9 @@ export const handler = async (event: S3Event) => {
       new GetObjectCommand({ Bucket: IMPORT_BUCKET, Key: key })
     );
 
-    await parseStream(Body as Readable);
+    const sent = await parseStream(Body as Readable);
+    console.log(`Sent ${sent} records to SQS for ${key}`);
+
     await moveToParsed(key);
   }
 };
