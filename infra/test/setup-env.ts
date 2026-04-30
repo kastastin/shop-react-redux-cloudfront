@@ -6,3 +6,4 @@ process.env.CATALOG_ITEMS_QUEUE_URL =
   "https://sqs.eu-west-1.amazonaws.com/123456789012/catalogItemsQueue";
 process.env.CREATE_PRODUCT_TOPIC_ARN =
   "arn:aws:sns:eu-west-1:123456789012:createProductTopic";
+process.env.kastastin = "TEST_PASSWORD";
