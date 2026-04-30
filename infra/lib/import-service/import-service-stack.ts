@@ -8,9 +8,22 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as path from "path";
 import { Construct } from "constructs";
 
+interface ImportServiceStackProps extends cdk.StackProps {
+  basicAuthorizerArn: string;
+}
+
 export class ImportServiceStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: ImportServiceStackProps) {
     super(scope, id, props);
+
+    const basicAuthorizer = lambda.Function.fromFunctionAttributes(
+      this,
+      "ImportedBasicAuthorizer",
+      {
+        functionArn: props.basicAuthorizerArn,
+        sameEnvironment: true,
+      }
+    );
 
     const importBucket = new s3.Bucket(this, "ImportBucket", {
       bucketName: `import-service-bucket-${this.account}`,
@@ -92,12 +105,41 @@ export class ImportServiceStack extends cdk.Stack {
       },
     });
 
+    const corsResponseHeaders = {
+      "Access-Control-Allow-Origin": "'*'",
+      "Access-Control-Allow-Headers": "'*'",
+    };
+
+    api.addGatewayResponse("Unauthorized", {
+      type: apigateway.ResponseType.UNAUTHORIZED,
+      statusCode: "401",
+      responseHeaders: corsResponseHeaders,
+    });
+
+    api.addGatewayResponse("AccessDenied", {
+      type: apigateway.ResponseType.ACCESS_DENIED,
+      statusCode: "403",
+      responseHeaders: corsResponseHeaders,
+    });
+
+    const tokenAuthorizer = new apigateway.TokenAuthorizer(
+      this,
+      "BasicTokenAuthorizer",
+      {
+        handler: basicAuthorizer,
+        identitySource: apigateway.IdentitySource.header("Authorization"),
+        resultsCacheTtl: cdk.Duration.seconds(0),
+      }
+    );
+
     const importResource = api.root.addResource("import");
     importResource.addMethod(
       "GET",
       new apigateway.LambdaIntegration(importProductsFile),
       {
         requestParameters: { "method.request.querystring.name": true },
+        authorizer: tokenAuthorizer,
+        authorizationType: apigateway.AuthorizationType.CUSTOM,
       }
     );
 
